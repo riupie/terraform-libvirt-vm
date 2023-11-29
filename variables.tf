@@ -152,10 +152,10 @@ variable "dhcp" {
   default     = false
 }
 
-variable "bridge" {
-  description = "Bridge interface"
+variable "network_name" {
+  description = "Network name"
   type        = string
-  default     = "virbr0"
+  default     = "default"
 }
 
 variable "ip_address" {

@@ -209,7 +209,7 @@ variable "time_zone" {
 variable "ssh_private_key" {
   description = "Private key for SSH connection test (either path to file or key content)"
   type        = string
-  default     = null
+  default     = "~/.ssh/id_rsa"
 }
 
 variable "runcmd" {

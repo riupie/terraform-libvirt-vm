@@ -22,7 +22,7 @@ resource "libvirt_domain" "virt-machine" {
   cloudinit = element(libvirt_cloudinit_disk.commoninit[*].id, count.index)
 
   network_interface {
-    bridge         = var.bridge
+    network_name   = var.network_name
     wait_for_lease = true
     hostname       = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
   }
@@ -65,7 +65,7 @@ resource "libvirt_domain" "virt-machine" {
   }
 
   graphics {
-    type        = var.graphics
+    type        = "vnc"
     listen_type = "address"
     autoport    = true
   }

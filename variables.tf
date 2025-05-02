@@ -152,10 +152,10 @@ variable "dhcp" {
   default     = false
 }
 
-variable "bridge" {
-  description = "Bridge interface"
+variable "network_name" {
+  description = "Network name"
   type        = string
-  default     = "virbr0"
+  default     = "default"
 }
 
 variable "ip_address" {
@@ -209,7 +209,7 @@ variable "time_zone" {
 variable "ssh_private_key" {
   description = "Private key for SSH connection test (either path to file or key content)"
   type        = string
-  default     = null
+  default     = "~/.ssh/id_rsa"
 }
 
 variable "runcmd" {

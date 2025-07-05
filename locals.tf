@@ -16,19 +16,31 @@ EOT
 
   flattened_disks = var.attach_individual_disks_per_vm ? flatten([
     for vm_index, disks in var.additional_disks : [
-      for d in disks : {
-        vm_index = tonumber(vm_index)
-        name     = d.name
-        size     = d.size
-        format   = try(d.format, "qcow2")
+      for disk_index, d in disks : {
+        vm_index     = tonumber(vm_index)
+        disk_index   = disk_index
+        base_name    = d.name
+        name         = (
+          try(d.format, "qcow2") == "qcow2"
+            ? "${d.name}-${vm_index}-${disk_index}.qcow2"
+            : "${d.name}-${vm_index}-${disk_index}"
+        )
+        size   = d.size
+        format = try(d.format, "qcow2")
       }
     ]
   ]) : [
-    for d in var.additional_disks : {
-      vm_index = null
-      name     = d.name
-      size     = d.size
-      format   = try(d.format, "qcow2")
+    for i, d in var.additional_disks : {
+      vm_index     = null
+      disk_index   = i
+      base_name    = d.name
+      name         = (
+        try(d.format, "qcow2") == "qcow2"
+          ? "${d.name}-${i}.qcow2"
+          : "${d.name}-${i}"
+      )
+      size   = d.size
+      format = try(d.format, "qcow2")
     }
   ]
 

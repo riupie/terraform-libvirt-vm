@@ -72,13 +72,6 @@ resize_rootfs: true
 
 timezone: ${time_zone}
 
-# Command to execute after the first boot (only once)
-%{ if length(runcmds) > 0 ~}
-runcmd:
-  %{~ for cmd in runcmds ~}
-  - ${cmd}
-  %{~ endfor ~}
-%{ endif ~}
 
 # Disable IPv6
 %{ if disable_ipv6 ~}

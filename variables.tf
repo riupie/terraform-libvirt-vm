@@ -266,3 +266,9 @@ variable "bastion_ssh_private_key" {
   type        = string
   default     = null
 }
+
+variable "disable_ipv6" {
+  description = "Disable IPv6 on the instance"
+  type        = bool
+  default     = false
+}

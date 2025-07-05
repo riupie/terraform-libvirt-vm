@@ -31,6 +31,7 @@ resource "libvirt_cloudinit_disk" "commoninit" {
       hostname           = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
       time_zone          = var.time_zone
       runcmd             = local.runcmd
+      disable_ipv6       = var.disable_ipv6
     }
   )
   network_config = templatefile(

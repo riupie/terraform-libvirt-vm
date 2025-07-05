@@ -100,6 +100,12 @@ resource "libvirt_domain" "virt-machine" {
       bastion_private_key = try(file(var.bastion_ssh_private_key), var.bastion_ssh_private_key, null)
     }
   }
+  lifecycle {
+    precondition {
+      condition     = !(length(var.additional_disk_ids) > 0 && length(var.additional_disks) > 0)
+      error_message = "Cannot set both additional_disk_ids and additional_disks. Choose one."
+    }
+  }
 }
 
 # Additional libvirt volume

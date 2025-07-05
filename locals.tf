@@ -32,11 +32,10 @@ EOT
     }
   ]
 
-  volumes_by_vm_index = var.attach_individual_disks_per_vm ?
-    {
-      for vm_index in range(var.vm_count) : vm_index => [
-        for disk in local.flattened_disks : disk.name
-        if disk.vm_index == vm_index
-      ]
-    } : {}
+  volumes_by_vm_index = var.attach_individual_disks_per_vm ? {
+    for vm_index in range(var.vm_count) : vm_index => [
+      for disk in local.flattened_disks : disk.name
+      if disk.vm_index == vm_index
+    ]
+  } : {}
 }

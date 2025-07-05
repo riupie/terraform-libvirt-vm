@@ -11,15 +11,30 @@ variable "base_volume_name" {
 }
 
 variable "base_pool_name" {
-  description = "Name of base OS image"
+  description = "Name of pool OS image"
   type        = string
   default     = null
 }
 
 variable "additional_disk_ids" {
-  description = "List of volume ids"
+  description = "List of existing libvirt_volume IDs to attach to each VM"
   type        = list(string)
   default     = []
+}
+
+variable "additional_disks" {
+  description = <<EOT
+New format: list of disk definitions (global or per-VM).
+If `attach_individual_disks_per_vm = true`, must be a map of VM index to list of disks.
+EOT
+  type = any
+  default = []
+}
+
+variable "attach_individual_disks_per_vm" {
+  description = "If true, attach additional disks per VM index using additional_disks map"
+  type        = bool
+  default     = false
 }
 
 

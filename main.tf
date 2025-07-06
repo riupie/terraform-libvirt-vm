@@ -47,10 +47,24 @@ resource "libvirt_domain" "virt-machine" {
     volume_id = element(libvirt_volume.volume-qcow2[*].id, count.index)
   }
 
+  # Attach legacy additional_disk_ids (old way)
   dynamic "disk" {
-    for_each = var.additional_disk_ids
+    for_each = local.use_new_disk_mode ? [] : var.additional_disk_ids
     content {
       volume_id = disk.value
+    }
+  }
+
+  # Attach new auto-created volumes (global or per-VM)
+  dynamic "disk" {
+    for_each = local.use_new_disk_mode ? {
+      for idx, vol in libvirt_volume.additional :
+      idx => vol
+      if !var.attach_individual_disks_per_vm || local.flattened_disks[idx].vm_index == count.index
+    } : {}
+
+    content {
+      volume_id = disk.value.id
     }
   }
 
@@ -86,4 +100,19 @@ resource "libvirt_domain" "virt-machine" {
       bastion_private_key = try(file(var.bastion_ssh_private_key), var.bastion_ssh_private_key, null)
     }
   }
+  lifecycle {
+    precondition {
+      condition     = !(length(var.additional_disk_ids) > 0 && length(var.additional_disks) > 0)
+      error_message = "Cannot set both additional_disk_ids and additional_disks. Choose one."
+    }
+  }
+}
+
+# Additional libvirt volume
+resource "libvirt_volume" "additional" {
+  count  = local.use_new_disk_mode ? length(local.flattened_disks) : 0
+  name   = local.flattened_disks[count.index].name
+  size   = local.flattened_disks[count.index].size
+  format = local.flattened_disks[count.index].format
+  pool   = var.base_pool_name
 }

@@ -71,3 +71,16 @@ growpart:
 resize_rootfs: true
 
 timezone: ${time_zone}
+
+
+# Disable IPv6
+%{ if disable_ipv6 ~}
+write_files:
+  - path: /etc/sysctl.d/10-disable-ipv6.conf
+    permissions: '0644'
+    owner: root:root
+    content: |
+      net.ipv6.conf.all.disable_ipv6 = 1
+      net.ipv6.conf.default.disable_ipv6 = 1
+      net.ipv6.conf.lo.disable_ipv6 = 1
+%{ endif ~}

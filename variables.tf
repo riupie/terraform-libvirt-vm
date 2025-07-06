@@ -272,3 +272,9 @@ variable "disable_ipv6" {
   type        = bool
   default     = false
 }
+
+variable "network_interface" {
+  description = "The network interface for the instance"
+  type        = string
+  default     = "ens3"
+}

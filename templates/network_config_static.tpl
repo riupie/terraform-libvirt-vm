@@ -1,11 +1,18 @@
+#cloud-config
 version: 2
 ethernets:
-  ${nic}:
+%{ for nic in interfaces ~}
+  ${nic.name}:
     dhcp4: no
-    addresses: [${ip_address}/24]
-    gateway4: ${ip_gateway}
+    addresses: [${nic.address}/24]
+%{ if contains(keys(nic), "gateway") }
+    gateway4: ${nic.gateway}
+%{ endif }
+%{ if contains(keys(nic), "dns") }
     nameservers:
-       addresses:
-        - ${ip_nameserver}
-        - 8.8.8.8
-        - 1.1.1.1
+      addresses:
+%{ for dns in nic.dns ~}
+        - ${dns}
+%{ endfor ~}
+%{ endif }
+%{ endfor ~}

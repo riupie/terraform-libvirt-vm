@@ -1,7 +1,11 @@
 version: 2
 ethernets:
-%{ for nic in interfaces ~}
+%{ for idx, nic in interfaces ~}
+  %{ if contains(keys(nic), "name") && nic.name != null }
   ${nic.name}:
+  %{ else }
+  eth${idx}:
+  %{ endif }
     dhcp4: false
     addresses: [${nic.address}/24]
 %{ if contains(keys(nic), "gateway") && nic.gateway != null }

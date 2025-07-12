@@ -173,24 +173,6 @@ variable "network_name" {
   default     = "default"
 }
 
-variable "ip_address" {
-  description = "List of IP addresses"
-  type        = list(string)
-  default     = ["192.168.123.101"]
-}
-
-variable "ip_nameserver" {
-  description = "IP addresses of a nameserver"
-  type        = string
-  default     = "192.168.123.1"
-}
-
-variable "ip_gateway" {
-  description = "IP addresses of a gateway"
-  type        = string
-  default     = "192.168.123.1"
-}
-
 variable "ssh_admin" {
   description = "Admin user with ssh access"
   type        = string
@@ -273,19 +255,13 @@ variable "disable_ipv6" {
   default     = false
 }
 
-variable "network_interface" {
-  description = "The network interface for the instance"
-  type        = string
-  default     = "ens3"
-}
-
 variable "network_interfaces" {
   description = "Map of VM index -> list of interfaces"
   type = map(list(object({
-    name         = string
-    address      = string
-    gateway      = optional(string)
-    dns          = optional(list(string))
-    network_name = string
+    name     = optional(string)
+    address  = string
+    gateway  = optional(string)
+    dns      = optional(list(string))
+    network_name   = string
   })))
 }

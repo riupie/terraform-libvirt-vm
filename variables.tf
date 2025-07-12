@@ -27,8 +27,8 @@ variable "additional_disks" {
 New format: list of disk definitions (global or per-VM).
 If `attach_individual_disks_per_vm = true`, must be a map of VM index to list of disks.
 EOT
-  type = any
-  default = []
+  type        = any
+  default     = []
 }
 
 variable "attach_individual_disks_per_vm" {
@@ -282,10 +282,10 @@ variable "network_interface" {
 variable "network_interfaces" {
   description = "Map of VM index -> list of interfaces"
   type = map(list(object({
-    name     = string
-    address  = string
-    gateway  = optional(string)
-    dns      = optional(list(string))
-    bridge   = string
+    name         = string
+    address      = string
+    gateway      = optional(string)
+    dns          = optional(list(string))
+    network_name = string
   })))
 }

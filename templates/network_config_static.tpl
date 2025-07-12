@@ -1,9 +1,9 @@
-#cloud-config
+# This file uses Terraform's template syntax for variable interpolation and loops.
 version: 2
 ethernets:
 %{ for nic in interfaces ~}
   ${nic.name}:
-    dhcp4: no
+    dhcp4: false
     addresses: [${nic.address}/24]
 %{ if contains(keys(nic), "gateway") }
     gateway4: ${nic.gateway}
@@ -11,8 +11,8 @@ ethernets:
 %{ if contains(keys(nic), "dns") }
     nameservers:
       addresses:
-%{ for dns in nic.dns ~}
-        - ${dns}
-%{ endfor ~}
+%{ for ns in nic.dns ~}
+        - ${ns}
+%{ endfor }
 %{ endif }
-%{ endfor ~}
+%{ endfor }

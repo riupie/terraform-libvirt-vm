@@ -36,6 +36,6 @@ resource "libvirt_cloudinit_disk" "commoninit" {
     }
   )
 
-  network_config = data.template_file.network_config[count.index].rendered
+  network_config = local.network_configs[count.index]
   pool           = var.pool
 }

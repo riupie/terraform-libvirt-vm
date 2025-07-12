@@ -50,4 +50,12 @@ EOT
       if disk.vm_index == vm_index
     ]
   } : {}
+  network_configs = [
+    for i in range(var.vm_count) : templatefile(
+      "${path.module}/templates/network_config_${var.dhcp ? "dhcp" : "static"}.tpl",
+      {
+        interfaces = lookup(var.network_interfaces, i, [])
+      }
+    )
+  ]
 }

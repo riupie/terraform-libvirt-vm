@@ -24,7 +24,7 @@ resource "libvirt_domain" "virt-machine" {
 dynamic "network_interface" {
   for_each = lookup(var.network_interfaces, count.index, [])
   content {
-    bridge         = network_interface.value.bridge
+    network_name         = network_interface.value.network_name
     wait_for_lease = true
     hostname       = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
   }

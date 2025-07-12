@@ -1,11 +1,21 @@
 version: 2
 ethernets:
-  ${nic}:
-    dhcp4: no
-    addresses: [${ip_address}/24]
-    gateway4: ${ip_gateway}
+%{ for idx, nic in interfaces ~}
+  %{ if contains(keys(nic), "name") && nic.name != null }
+  ${nic.name}:
+  %{ else }
+  eth${idx}:
+  %{ endif }
+    dhcp4: false
+    addresses: [${nic.address}/24]
+%{ if contains(keys(nic), "gateway") && nic.gateway != null }
+    gateway4: ${nic.gateway}
+%{ endif }
+%{ if contains(keys(nic), "dns") && nic.dns != null }
     nameservers:
-       addresses:
-        - ${ip_nameserver}
-        - 8.8.8.8
-        - 1.1.1.1
+      addresses:
+%{ for ns in nic.dns ~}
+        - ${ns}
+%{ endfor ~}
+%{ endif }
+%{ endfor ~}

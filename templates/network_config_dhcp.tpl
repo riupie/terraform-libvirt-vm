@@ -1,4 +1,6 @@
 version: 2
 ethernets:
-  ${nic}:
+%{ for nic in interfaces ~}
+  ${nic.name}:
     dhcp4: true
+%{ endfor }

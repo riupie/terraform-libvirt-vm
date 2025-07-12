@@ -21,11 +21,14 @@ resource "libvirt_domain" "virt-machine" {
 
   cloudinit = element(libvirt_cloudinit_disk.commoninit[*].id, count.index)
 
-  network_interface {
-    network_name   = var.network_name
+dynamic "network_interface" {
+  for_each = lookup(var.network_interfaces, count.index, [])
+  content {
+    bridge         = network_interface.value.bridge
     wait_for_lease = true
     hostname       = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
   }
+}
 
   xml {
     xslt = templatefile("${path.module}/xslt/template.tftpl", var.xml_override)

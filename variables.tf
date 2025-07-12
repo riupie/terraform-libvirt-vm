@@ -278,3 +278,14 @@ variable "network_interface" {
   type        = string
   default     = "ens3"
 }
+
+variable "network_interfaces" {
+  description = "Map of VM index -> list of interfaces"
+  type = map(list(object({
+    name     = string
+    address  = string
+    gateway  = optional(string)
+    dns      = optional(list(string))
+    bridge   = string
+  })))
+}

@@ -23,7 +23,7 @@ resource "libvirt_domain" "virt-machine" {
 
   network_interface {
     network_name   = var.network_name
-    wait_for_lease = true
+    wait_for_lease = var.dhcp
     hostname       = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
   }
 
@@ -78,7 +78,7 @@ resource "libvirt_domain" "virt-machine" {
     connection {
       type                = "ssh"
       user                = var.ssh_admin
-      host                = self.network_interface[0].addresses[0]
+      host                = var.dhcp ? self.network_interface[0].addresses[0] : element(var.ip_address, count.index)
       private_key         = try(file(var.ssh_private_key), var.ssh_private_key, null)
       timeout             = "2m"
       bastion_host        = var.bastion_host

@@ -31,17 +31,11 @@ resource "libvirt_cloudinit_disk" "commoninit" {
       hostname           = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
       time_zone          = var.time_zone
       runcmd             = local.runcmd
+      disable_ipv6       = var.disable_ipv6
+
     }
   )
-  network_config = templatefile(
-    "${path.module}/templates/network_config_${var.dhcp == true ? "dhcp" : "static"}.tpl",
-    {
-      ip_address    = element(var.ip_address, count.index)
-      ip_gateway    = var.ip_gateway
-      ip_nameserver = var.ip_nameserver
-      nic           = (var.share_filesystem.source == null ? "ens3" : "ens4")
-      # WA: If the shared filesystem is used, Libvirt connects Unclassified device to the 3rd position of PCI bus
-    }
-  )
-  pool = var.pool
+
+  network_config = local.network_configs[count.index]
+  pool           = var.pool
 }

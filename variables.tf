@@ -11,15 +11,30 @@ variable "base_volume_name" {
 }
 
 variable "base_pool_name" {
-  description = "Name of base OS image"
+  description = "Name of pool OS image"
   type        = string
   default     = null
 }
 
 variable "additional_disk_ids" {
-  description = "List of volume ids"
+  description = "List of existing libvirt_volume IDs to attach to each VM"
   type        = list(string)
   default     = []
+}
+
+variable "additional_disks" {
+  description = <<EOT
+New format: list of disk definitions (global or per-VM).
+If `attach_individual_disks_per_vm = true`, must be a map of VM index to list of disks.
+EOT
+  type        = any
+  default     = []
+}
+
+variable "attach_individual_disks_per_vm" {
+  description = "If true, attach additional disks per VM index using additional_disks map"
+  type        = bool
+  default     = false
 }
 
 
@@ -158,24 +173,6 @@ variable "network_name" {
   default     = "default"
 }
 
-variable "ip_address" {
-  description = "List of IP addresses"
-  type        = list(string)
-  default     = ["192.168.123.101"]
-}
-
-variable "ip_nameserver" {
-  description = "IP addresses of a nameserver"
-  type        = string
-  default     = "192.168.123.1"
-}
-
-variable "ip_gateway" {
-  description = "IP addresses of a gateway"
-  type        = string
-  default     = "192.168.123.1"
-}
-
 variable "ssh_admin" {
   description = "Admin user with ssh access"
   type        = string
@@ -250,4 +247,21 @@ variable "bastion_ssh_private_key" {
   description = "Bastion private key for SSH connection test (either path to file or key content)"
   type        = string
   default     = null
+}
+
+variable "disable_ipv6" {
+  description = "Disable IPv6 on the instance"
+  type        = bool
+  default     = false
+}
+
+variable "network_interfaces" {
+  description = "Map of VM index -> list of interfaces"
+  type = map(list(object({
+    name     = optional(string)
+    address  = string
+    gateway  = optional(string)
+    dns      = optional(list(string))
+    network_name   = string
+  })))
 }

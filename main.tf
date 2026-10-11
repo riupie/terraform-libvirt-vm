@@ -21,10 +21,13 @@ resource "libvirt_domain" "virt-machine" {
 
   cloudinit = element(libvirt_cloudinit_disk.commoninit[*].id, count.index)
 
-  network_interface {
-    network_name   = var.network_name
-    wait_for_lease = var.dhcp
-    hostname       = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
+  dynamic "network_interface" {
+    for_each = lookup(var.network_interfaces, count.index, [])
+    content {
+      network_name   = network_interface.value.network_name
+      wait_for_lease = var.dhcp
+      hostname       = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
+    }
   }
 
   xml {
@@ -47,10 +50,24 @@ resource "libvirt_domain" "virt-machine" {
     volume_id = element(libvirt_volume.volume-qcow2[*].id, count.index)
   }
 
+  # Attach legacy additional_disk_ids (old way)
   dynamic "disk" {
-    for_each = var.additional_disk_ids
+    for_each = local.use_new_disk_mode ? [] : var.additional_disk_ids
     content {
       volume_id = disk.value
+    }
+  }
+
+  # Attach new auto-created volumes (global or per-VM)
+  dynamic "disk" {
+    for_each = local.use_new_disk_mode ? {
+      for idx, vol in libvirt_volume.additional :
+      idx => vol
+      if !var.attach_individual_disks_per_vm || local.flattened_disks[idx].vm_index == count.index
+    } : {}
+
+    content {
+      volume_id = disk.value.id
     }
   }
 
@@ -78,7 +95,7 @@ resource "libvirt_domain" "virt-machine" {
     connection {
       type                = "ssh"
       user                = var.ssh_admin
-      host                = var.dhcp ? self.network_interface[0].addresses[0] : element(var.ip_address, count.index)
+      host                = var.dhcp ? self.network_interface[0].addresses[0] : var.network_interfaces[count.index][0].address
       private_key         = try(file(var.ssh_private_key), var.ssh_private_key, null)
       timeout             = "2m"
       bastion_host        = var.bastion_host
@@ -86,4 +103,19 @@ resource "libvirt_domain" "virt-machine" {
       bastion_private_key = try(file(var.bastion_ssh_private_key), var.bastion_ssh_private_key, null)
     }
   }
+  lifecycle {
+    precondition {
+      condition     = !(length(var.additional_disk_ids) > 0 && length(var.additional_disks) > 0)
+      error_message = "Cannot set both additional_disk_ids and additional_disks. Choose one."
+    }
+  }
+}
+
+# Additional libvirt volume
+resource "libvirt_volume" "additional" {
+  count  = local.use_new_disk_mode ? length(local.flattened_disks) : 0
+  name   = local.flattened_disks[count.index].name
+  size   = local.flattened_disks[count.index].size
+  format = local.flattened_disks[count.index].format
+  pool   = var.base_pool_name
 }

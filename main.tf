@@ -21,14 +21,14 @@ resource "libvirt_domain" "virt-machine" {
 
   cloudinit = element(libvirt_cloudinit_disk.commoninit[*].id, count.index)
 
-dynamic "network_interface" {
-  for_each = lookup(var.network_interfaces, count.index, [])
-  content {
-    network_name         = network_interface.value.network_name
-    wait_for_lease = true
-    hostname       = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
+  dynamic "network_interface" {
+    for_each = lookup(var.network_interfaces, count.index, [])
+    content {
+      network_name   = network_interface.value.network_name
+      wait_for_lease = var.dhcp
+      hostname       = format("${var.vm_hostname_prefix}%02d", count.index + var.index_start)
+    }
   }
-}
 
   xml {
     xslt = templatefile("${path.module}/xslt/template.tftpl", var.xml_override)
@@ -95,7 +95,7 @@ dynamic "network_interface" {
     connection {
       type                = "ssh"
       user                = var.ssh_admin
-      host                = self.network_interface[0].addresses[0]
+      host                = var.dhcp ? self.network_interface[0].addresses[0] : var.network_interfaces[count.index][0].address
       private_key         = try(file(var.ssh_private_key), var.ssh_private_key, null)
       timeout             = "2m"
       bastion_host        = var.bastion_host
